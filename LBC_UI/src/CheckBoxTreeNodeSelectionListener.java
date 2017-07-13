@@ -7,6 +7,8 @@ import javax.swing.tree.DefaultTreeModel;
   
 public class CheckBoxTreeNodeSelectionListener extends MouseAdapter  
 {  
+    private String choose=null;
+    private String unchoose = null;
     @Override  
     public void mouseClicked(MouseEvent event)  
     {  
@@ -23,8 +25,20 @@ public class CheckBoxTreeNodeSelectionListener extends MouseAdapter
                 boolean isSelected = !node.isSelected();  
                 node.setSelected(isSelected);  
                 ((DefaultTreeModel)tree.getModel()).nodeStructureChanged(node); 
-                System.out.println((String)node.a);
+                if(node.isSelected()){
+                  choose = (String)node.a;
+                  System.out.println(choose);
+                }
+                else{
+                  unchoose = (String)node.a;
+                }
             }  
         }  
-    }  
+    } 
+    public String getChoose(){
+      return choose;
+    }
+    public String getUnchoose(){
+      return unchoose;
+    }
 }  

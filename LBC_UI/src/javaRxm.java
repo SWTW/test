@@ -1,8 +1,11 @@
 ﻿import java.io.IOException;
+import java.io.Serializable;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -13,8 +16,9 @@ import java.util.regex.Pattern;
 /** dom jiexi **/
 
 public class javaRxm {
-    
+	 private static final Logger lg= Logger.getLogger(javaRxm.class);
     public static void main(String args[]){
+
         javaRxm newslist = new javaRxm();
         Vector<newsItem> newslis = newslist.returnvector(null);
         for(newsItem b :newslis){
@@ -41,6 +45,8 @@ public class javaRxm {
     
     //读取并录入新闻，返回一个容器。
     public Vector returnvector(String address) {
+    	lg.info("读取新闻");
+    	
         Vector<newsItem> NewsList = new Vector<newsItem>(); // 
 
         // 解析器工厂
@@ -50,14 +56,29 @@ public class javaRxm {
             // 解析器对象
             DocumentBuilder db = dbf.newDocumentBuilder();
             // 解析
-            Document[] document= {db.parse(address)};
+            Document[] document = new Document[3];
+            if(address.equals("")){
+            	
+            	document[0]= db.parse("guangming.xml");
+            	document[1]=db.parse("nanfangdaily.xml");
+            	document[2]=db.parse("sichuan.xml");
+           	}
+            else{
+            	document[0]= db.parse(address);
+            document[1]=null;
+            document[2]=null;
+            
+        }
             //以newsdata为单位查找 新闻
         //  NodeList newsList = null;
         //  System.out.println("总共有"+newsList.getLength()+"条新闻");
 
             // 遍历新闻
-       for(int dindex=0;dindex<1;dindex++){
-           NodeList newsList=document[dindex].getElementsByTagName("NewsData");
+       for(int dindex=0;dindex<3;dindex++){
+    	   if(document[dindex]==null)
+    		   continue;
+    	   NodeList newsList=document[dindex].getElementsByTagName("NewsData");
+    	   int num=0;
             for (int i = 0; i <newsList.getLength(); i++) {
 
                 Element element = (Element) newsList.item(i); // element
@@ -133,7 +154,16 @@ public class javaRxm {
                         anews.theBodyContent=newone.getContent();
                     }
                    } 
-             
+            
+            //选100条
+             if(address.equals("")){
+            	 if(anews.theBodyContent!=null){
+            		 num++;
+            		 if(num>=100){
+            			 break;
+            		 }
+            	 }
+             }
                
             
                 NewsList.add(anews);// 加入新闻列表
@@ -171,7 +201,7 @@ public class javaRxm {
 }
 
 // 创建新闻类
-class newsItem {
+class newsItem implements Serializable{
     public String theTitle;
     public String theDate;
     public String theLocation;
@@ -180,9 +210,18 @@ class newsItem {
     public String theType;
     public int theWordcount;
     public String theId;
-    public String theTags;
+    public String theTags="";
     public String theEncodeContent;
     public String theBodyContent;
+    public boolean isDelete=false;
+    public String theTheme="";
+    boolean getIsDelete() {
+    	return this.isDelete;
+    }
+    void setIsDelete(boolean isdelete) {
+    	this.isDelete=isdelete;
+    }
+    
     String getTheBodyContent(){
         return this.theBodyContent;
     }
